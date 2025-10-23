@@ -13,7 +13,6 @@ config.vm.define "database" do |db|
 
   db.vm.provision "shell" do |s|
     s.inline = <<-'SHELL'
-      set -euxo pipefail
       export DEBIAN_FRONTEND=noninteractive
 
       apt-get update
@@ -61,17 +60,7 @@ end
     backend.vm.synced_folder "./Project-Cinema/backend", "/app"
 
     backend.vm.provision "shell", run: "always", inline: <<-'SHELL'
-      set -euxo pipefail
       export DEBIAN_FRONTEND=noninteractive
-
-      # 0) SWAP 2G – stabilniejszy build
-      if ! swapon --show | grep -q .; then
-        fallocate -l 2G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=2048
-        chmod 600 /swapfile
-        mkswap /swapfile
-        swapon /swapfile
-        echo '/swapfile none swap sw 0 0' >> /etc/fstab
-      fi
 
       # 1) narzędzia
       apt-get update -y
@@ -121,7 +110,7 @@ end
         MVN="./mvnw"
       fi
 
-      # Jedna komenda – zapobiega "Source file is not available"
+
       $MVN -B -DskipTests clean package spring-boot:repackage
 
       # wybierz finalny JAR
@@ -157,7 +146,6 @@ end
 
     frontend.vm.provision "shell", run: "always" do |s|
       s.inline = <<-'SHELL'
-        set -euxo pipefail
         export DEBIAN_FRONTEND=noninteractive
 
         apt-get update -y
